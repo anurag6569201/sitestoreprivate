@@ -1,0 +1,58 @@
+{% extends "partials/landing_base.html" %}
+{% load static %}
+
+{% block head_title %}
+    SiteStore | Home
+{% endblock head_title %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="{% static 'assets/css/home/home.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+{% endblock stylesheet %}
+
+{% block content %}
+
+{% include 'includes/navbar.html' %}
+<div class="container">
+    <div class="home_crousal">
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                {% for sites in crousal_sites %}
+                    <div class="swiper-slide">
+                        <div class="home_crousal_card">
+                            <img src="{{ sites.logo_link }}" alt="{{ sites.logo_link }}" height="100px">
+                            <h2>{{ sites.title }}</h2>
+                            <p>{{ sites.content }}</p>
+                            <a href="{{ sites.visiting_link }}" target="_blank" class="btn btn-primary">Visit Site</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-pagination"></div>
+          </div>
+        
+          <!-- Swiper JS -->
+          <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+        
+          <!-- Initialize Swiper -->
+          <script>
+            var swiper = new Swiper(".mySwiper", {
+              slidesPerView: 3,
+              spaceBetween: 30,
+              loop: true,
+              pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+              },
+              navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+              },
+            });
+          </script>
+    </div>
+</div>
+
+{% endblock content %}
