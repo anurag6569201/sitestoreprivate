@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-3m)-s-pws$g-809=vmf#lyzrd!+om#21dk8r&a^ig6lm55r5aa
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://boobies.azurewebsites.net','*']
+CSRF_TRUSTED_ORIGINS = ['https://boobies.azurewebsites.net','https://127.0.0.1']
 
 
 # Application definition
