@@ -1,0 +1,353 @@
+{% extends "partials/landing_base.html" %}
+{% load static %}
+
+{% block head_title %}
+SiteStore | Home
+{% endblock head_title %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="{% static 'assets/css/home/home.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/home/single.css' %}">
+
+{% endblock stylesheet %}
+{% block content %}
+
+{% include 'includes/navbar.html' %}
+
+<!-- Main Layout -->
+<main class="main-layout">
+    <div class="screen-overlay"></div>
+    {% include 'includes/sidebar.html' %}
+
+    <div class="content-wrapper">
+
+        <!-- Video List -->
+        <div>
+
+            <div class="container-fluid mt-3">
+                <div class="row">
+                    <!-- Video Player Section -->
+                    <div class="col-lg-8">
+                        <div class="video-player ratio ratio-16x9 mb-3">
+                            <iframe src="{{specified_video.embed}}" class="w-100 h-100 object-fit-cover" frameborder="0"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+
+
+                        <!-- Video Info -->
+                        <h5 class="mb-3">{{specified_video.title}}</h5>
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                            <div class="d-flex gap-2 flex-wrap">
+                                {% for keyword in specified_video.keywords %}
+                                <button class="action-button">
+                                    {{ keyword }}
+                                </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between mb-4">
+                                <h5>ScreenShots</h5>
+                            </div>
+
+                            <!-- Comment -->
+                            <div class="d-flex gap-3 mb-4">
+                                <div class="row row-cols-1 row-cols-md-3 g-4">
+                                    {% for screenshots in specified_video.thumbs %}
+                                    <div class="col">
+                                        <div class="card h-100">
+                                            <img src="{{screenshots.src}}" class="card-img-top" alt="...">
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Recommended Videos -->
+                    <div class="col-lg-4">
+                        <h6 class="mb-3">Recommended videos</h6>
+
+                        <!-- Video Card -->
+                        <div class="recommeded-videos-container" id="recommendedVideos">
+                            <div class="recommeded_videos" id="recommeded_videos">
+
+                            </div>
+                        </div>
+
+
+                        <button style="opacity: 0;visibility: hidden;pointer-events: none;z-index: -100;"
+                            id="load-more">Load More</button>
+                    </div>
+                </div>
+                <!-- New Row for Overflow Recommended Videos -->
+                <div class="content-wrapper">
+                    <h6 class="mb-3">More Recommended Videos</h6>
+                    <div class="video-list" id="video-list">
+
+                    </div>
+                </div>
+            </div>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script>
+                $(document).ready(function () {
+                    const $videoList = $('#recommeded_videos'); // The container for videos
+                    const $loader = $('#loader'); // Loader for the loading animation
+                    const perPage = 14; // Number of videos per page
+                    let currentPage = 1; // Start with the first page
+                    let isFetching = false; // Flag to prevent duplicate API calls
+                    let totalVideos = null; // Total videos to fetch (set after the first API response)
+
+                    function renderVideos(videos) {
+                        videos.forEach(video => {
+                            const videoElement = `
+                                <a href="/video/${video.id}" class="video-card" data-video-id="${video.id}">
+                                    <div class="row g-0">
+                                            <div class="col-5">
+                                                <img src="${video.default_thumb.src}" alt="${video.title}" class="w-100 h-100 object-fit-cover">
+                                            </div>
+                                            <div class="col-7 ps-2">
+                                                <h6 class="video-title">${video.title}</h6>
+                                                <div class="channel-name">Khudgharz</div>
+                                                <div class="video-stats">${video.views} Views • ${video.rate} <b>⭐️</b></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <a/>
+                            `;
+                            $videoList.append(videoElement);
+                        });
+                    }
+
+                    function fetchVideos(page) {
+                        if (isFetching) return; // Prevent duplicate requests
+                        isFetching = true;
+                        $loader.show(); // Show the loader while fetching
+
+                        $.ajax({
+                            url: 'https://www.eporner.com/api/v2/video/search/',
+                            data: {
+                                query: '{{recommeded_video}}',
+                                per_page: perPage,
+                                page: page,
+                                thumbsize: 'big',
+                                order: 'top-weekly',
+                                gay: 1,
+                                lq: 1,
+                                format: 'json',
+                            },
+                            method: 'GET',
+                            success: function (response) {
+                                if (!totalVideos) totalVideos = response.total_count; // Set total videos on the first response
+                                if (response.videos && response.videos.length > 0) {
+                                    renderVideos(response.videos); // Render fetched videos
+                                    currentPage++; // Move to the next page
+                                    isFetching = false; // Reset the flag
+                                }
+
+                                // Stop loading if we've fetched all videos
+                                if (currentPage > Math.ceil(totalVideos / perPage)) {
+                                    $('#load-more').hide(); // Hide Load More button if no more videos to load
+                                    $loader.hide(); // Hide the loader
+                                }
+
+                                $.ajax({
+                                    headers: {
+                                        'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val(),
+                                    },
+                                    url: '/save-video-data/',  // Your endpoint to save data
+                                    method: 'POST',
+                                    data: JSON.stringify(response),  // Send the whole response
+                                    contentType: 'application/json',
+
+                                    success: function () {
+                                        console.log('Video data saved successfully');
+                                    },
+                                    error: function (error) {
+                                        console.error('Error saving video data:', error);
+                                    }
+                                });
+                            },
+                            error: function (error) {
+                                console.error('Error fetching videos:', error);
+                                isFetching = false; // Reset the flag on error
+                                $loader.hide(); // Hide the loader
+                            },
+                        });
+                    }
+
+                    // Initial fetch
+                    fetchVideos(currentPage);
+                });
+
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const videoCards = document.querySelectorAll('.video-card');
+                    videoCards.forEach(card => {
+                        const videoId = card.getAttribute('data-id');
+                        if (videoId) {
+                            card.setAttribute('href', `/video/${videoId}`);
+                        }
+                    });
+                });
+
+            </script>
+
+
+
+            <button style="opacity: 0;visibility: hidden;pointer-events: none;z-index: -100;" id="load-more">Load
+                More</button>
+            <script>
+                $(document).ready(function () {
+                    const $videoList = $('#video-list'); // The container for videos
+                    const $loader = $('#loader'); // Loader for the loading animation
+                    const perPage = 20; // Number of videos per page
+                    let currentPage = 1; // Start with the first page
+                    let isFetching = false; // Flag to prevent duplicate API calls
+                    let totalVideos = null; // Total videos to fetch (set after the first API response)
+
+                    function renderVideos(videos) {
+                        videos.forEach(video => {
+                            const videoElement = `
+                                <a href="/video/${video.id}" class="video-card" data-video-id="${video.id}">
+                                    <div class="thumbnail-container">
+                                        <img src="${video.default_thumb.src}" alt="${video.title}" class="thumbnail">
+                                        <p class="duration">${video.length_min}</p>
+                                    </div>
+                                    <div class="video-info">
+                                        <img src="https://yt3.googleusercontent.com/LrCNrwOMkNOpLKnRl0GgvIQOgo1mR90oXa1pjbuSRIRBT3_FMTYUbdEllsUTxt7Wq8-qPOdd=s160-c-k-c0x00ffffff-no-rj"
+                                            alt="Channel Logo" class="icon">
+                                        <div class="video-details">
+                                            <h2 class="title">${video.title}</h2>
+                                            <p class="channel-name">CodingLab</p>
+                                            <p class="views">${video.views} Views • ${video.rate} <b>⭐️</b></p>
+                                        </div>
+                                    </div>
+                                </a>
+                            `;
+                            $videoList.append(videoElement);
+                        });
+                    }
+
+                    function fetchVideos(page) {
+                        if (isFetching) return; // Prevent duplicate requests
+                        isFetching = true;
+                        $loader.show(); // Show the loader while fetching
+
+                        $.ajax({
+                            url: 'https://www.eporner.com/api/v2/video/search/',
+                            data: {
+                                query: '{{more_video}}',
+                                per_page: perPage,
+                                page: page,
+                                thumbsize: 'big',
+                                order: 'top-weekly',
+                                gay: 1,
+                                lq: 1,
+                                format: 'json',
+                            },
+                            method: 'GET',
+                            success: function (response) {
+                                if (!totalVideos) totalVideos = response.total_count; // Set total videos on the first response
+                                if (response.videos && response.videos.length > 0) {
+                                    renderVideos(response.videos); // Render fetched videos
+                                    currentPage++; // Move to the next page
+                                    isFetching = false; // Reset the flag
+                                }
+
+                                // Stop loading if we've fetched all videos
+                                if (currentPage > Math.ceil(totalVideos / perPage)) {
+                                    $('#load-more').hide(); // Hide Load More button if no more videos to load
+                                    $loader.hide(); // Hide the loader
+                                }
+
+                                $.ajax({
+                                    headers: {
+                                        'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val(),
+                                    },
+                                    url: '/save-video-data/',  // Your endpoint to save data
+                                    method: 'POST',
+                                    data: JSON.stringify(response),  // Send the whole response
+                                    contentType: 'application/json',
+
+                                    success: function () {
+                                        console.log('Video data saved successfully');
+                                    },
+                                    error: function (error) {
+                                        console.error('Error saving video data:', error);
+                                    }
+                                });
+                            },
+                            error: function (error) {
+                                console.error('Error fetching videos:', error);
+                                isFetching = false; // Reset the flag on error
+                                $loader.hide(); // Hide the loader
+                            },
+                        });
+                    }
+
+                    // Load More Button click event
+                    $('#load-more').on('click', function () {
+                        fetchVideos(currentPage); // Fetch the next set of videos
+                    });
+
+                    // Initial fetch
+                    fetchVideos(currentPage);
+                });
+
+                var isLoading = false;
+
+                $('.content-wrapper').on('scroll', function () {
+                    var scrollPosition = $(this).scrollTop();
+                    var contentHeight = $(this)[0].scrollHeight;
+                    var wrapperHeight = $(this).outerHeight();
+
+                    // Check if scrolled to 90% and not currently loading content
+                    if ((scrollPosition + wrapperHeight) / contentHeight >= 0.9 && !isLoading) {
+                        // Set flag to prevent multiple clicks while loading
+                        isLoading = true;
+
+                        // Trigger button click (simulate loading new content)
+                        $('#load-more').click();
+                        console.log("Scrolled to 90% of the content-wrapper and clicked the button.");
+
+                        // Simulate loading new content
+                        setTimeout(function () {
+                            loadNewContent();
+                        }, 10); // Simulate 1 second of loading time
+                    }
+                });
+
+                // Function to load new content
+                function loadNewContent() {
+                    // Example: Add some new content to the content-wrapper
+                    var newContent = $('<div class="new-content">New Content Loaded</div>');
+                    $('.content-wrapper').append(newContent);
+
+                    // Reset loading flag after content is loaded
+                    isLoading = false;
+                }
+                document.addEventListener('DOMContentLoaded', () => {
+                    const videoCards = document.querySelectorAll('.video-card');
+                    videoCards.forEach(card => {
+                        const videoId = card.getAttribute('data-id');
+                        if (videoId) {
+                            card.setAttribute('href', `/video/${videoId}`);
+                        }
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</main>
+
+
+
+{% endblock content %}

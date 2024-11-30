@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'import_export',
     'home',
 ]
 
@@ -128,3 +128,8 @@ MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+SESSION_COOKIE_AGE = 600  # Session expires after 10 minutes of inactivity (600 seconds)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session ends when the browser is closed
+SESSION_SAVE_EVERY_REQUEST = True 

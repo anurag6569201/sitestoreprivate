@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Clone</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body {
+            background-color: #0f0f0f;
+            color: white;
+        }
+
+        .navbar {
+            background-color: #0f0f0f !important;
+            border-bottom: 1px solid #272727;
+        }
+
+        .search-input {
+            background-color: #121212 !important;
+            border: 1px solid #303030 !important;
+            color: white !important;
+        }
+
+        .search-input:focus {
+            box-shadow: none !important;
+            border-color: #1c62b9 !important;
+        }
+
+        .search-button {
+            background-color: #222222 !important;
+            border: 1px solid #303030 !important;
+            color: white !important;
+        }
+
+        .video-container {
+            background-color: #0f0f0f;
+        }
+
+        .action-button {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .subscribe-button {
+            background-color: white;
+            color: black;
+        }
+
+        .subscribe-button:hover {
+            background-color: #f2f2f2;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #666;
+        }
+
+        .video-card {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .video-card:hover {
+            background-color: #272727;
+        }
+
+        .video-card img {
+            border-radius: 12px;
+        }
+
+        .video-title {
+            color: white;
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .channel-name, .video-stats {
+            color: #aaa;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="/api/placeholder/90/20" alt="YouTube Logo">
+            </a>
+            
+            <div class="d-flex flex-grow-1 justify-content-center">
+                <div class="input-group" style="max-width: 600px;">
+                    <input type="text" class="form-control search-input" placeholder="Search">
+                    <button class="btn search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <button class="btn text-white ms-3">
+                    <i class="fas fa-microphone"></i>
+                </button>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn text-white">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button class="btn text-white">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <button class="btn text-white">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid" style="margin-top: 80px;">
+        <div class="row">
+            <!-- Video Player Section -->
+            <div class="col-lg-8">
+                <div class="video-player ratio ratio-16x9 mb-3">
+                    <img src="/api/placeholder/1280/720" alt="Video thumbnail" class="w-100 h-100 object-fit-cover">
+                </div>
+
+                <!-- Video Info -->
+                <h5 class="mb-3">Le Gayi Le Gayi (Mujhko Hui Na Khabar) - Male Version | Dil To Pagal Hai</h5>
+                
+                <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="/api/placeholder/40/40" class="rounded-circle" alt="Channel avatar">
+                        <div>
+                            <h6 class="mb-0">Karan Nawani</h6>
+                            <small class="text-muted">1.59M subscribers</small>
+                        </div>
+                        <button class="subscribe-button action-button">Subscribe</button>
+                    </div>
+                    
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="action-button">
+                            <i class="fas fa-thumbs-up"></i>
+                            307K
+                        </button>
+                        <button class="action-button">
+                            <i class="fas fa-thumbs-down"></i>
+                        </button>
+                        <button class="action-button">
+                            <i class="fas fa-share"></i>
+                            Share
+                        </button>
+                        <button class="action-button">
+                            <i class="fas fa-download"></i>
+                            Download
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between mb-4">
+                        <h6>3,088 Comments</h6>
+                        <button class="btn text-white">
+                            <i class="fas fa-sort-amount-down me-2"></i>
+                            Sort by
+                        </button>
+                    </div>
+
+                    <!-- Comment -->
+                    <div class="d-flex gap-3 mb-4">
+                        <img src="/api/placeholder/40/40" class="rounded-circle" style="width: 40px; height: 40px;">
+                        <div>
+                            <div class="d-flex gap-2 mb-1">
+                                <strong>User123</strong>
+                                <small class="text-muted">2 months ago</small>
+                            </div>
+                            <p>Great cover! Love the way you've interpreted this classic song.</p>
+                            <div class="d-flex gap-2">
+                                <button class="action-button">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    1.2K
+                                </button>
+                                <button class="action-button">
+                                    <i class="fas fa-thumbs-down"></i>
+                                </button>
+                                <button class="action-button">Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommended Videos -->
+            <div class="col-lg-4">
+                <h6 class="mb-3">Recommended videos</h6>
+                
+                <!-- Video Card -->
+                <div class="video-card p-2 rounded mb-3">
+                    <div class="row g-0">
+                        <div class="col-5">
+                            <img src="/api/placeholder/168/94" class="w-100 h-100 object-fit-cover" alt="Thumbnail">
+                        </div>
+                        <div class="col-7 ps-2">
+                            <h6 class="video-title">Mix Tape | Khudgharz</h6>
+                            <div class="channel-name">Khudgharz</div>
+                            <div class="video-stats">926K views • 2 years ago</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional video cards would go here -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>

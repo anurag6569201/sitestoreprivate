@@ -2,57 +2,329 @@
 {% load static %}
 
 {% block head_title %}
-    SiteStore | Home
+SiteStore | Home
 {% endblock head_title %}
 
 {% block stylesheet %}
 <link rel="stylesheet" href="{% static 'assets/css/home/home.css' %}">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 {% endblock stylesheet %}
 
 {% block content %}
 
 {% include 'includes/navbar.html' %}
-<div class="container">
-    <div class="home_crousal">
-        <div class="swiper mySwiper">
-            <div class="swiper-wrapper">
-                {% for sites in crousal_sites %}
-                    <div class="swiper-slide">
-                        <div class="home_crousal_card">
-                            <img src="{{ sites.logo_link }}" alt="{{ sites.logo_link }}" height="100px">
-                            <h2>{{ sites.title }}</h2>
-                            <p>{{ sites.content }}</p>
-                            <a href="{{ sites.visiting_link }}" target="_blank" class="btn btn-primary">Visit Site</a>
-                        </div>
-                    </div>
-                {% endfor %}
+
+
+<!-- Main Layout -->
+<main class="main-layout">
+    <div class="screen-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="nav-section nav-left">
+            <button class="nav-button menu-button">
+                <i class="uil uil-bars"></i>
+            </button>
+            <a href="#" class="nav-logo">
+                <img src="images/logo.png" alt="Logo" class="logo-image">
+                <h2 class="logo-text">CnTube</h2>
+            </a>
+        </div>
+
+        <div class="links-container" style="position: sticky;top: 0;">
+            <div class="link-section">
+                <a href="#" class="link-item">
+                    <i class="uil uil-estate"></i> Home
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-video"></i> Shorts
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-tv-retro"></i> Subscriptions
+                </a>
             </div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
-            <div class="swiper-pagination"></div>
-          </div>
+            <div class="section-separator"></div>
+
+            <div class="link-section">
+                <h4 class="section-title">You</h4>
+                <a href="#" class="link-item">
+                    <i class="uil uil-user-square"></i> Your channel
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-history"></i> History
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-clock"></i> Watch later
+                </a>
+            </div>
+            <div class="section-separator"></div>
+
+            <div class="link-section">
+                <h4 class="section-title">Explore</h4>
+                <a href="#" class="link-item">
+                    <i class="uil uil-fire"></i> Trending
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-music"></i> Music
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-basketball"></i> Gaming
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-trophy"></i> Sports
+                </a>
+            </div>
+            <div class="section-separator"></div>
+
+            <div class="link-section">
+                <h4 class="section-title">More from YouTube</h4>
+                <a href="#" class="link-item">
+                    <i class="uil uil-shield-plus"></i> YouTube Plus
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-headphones-alt"></i> YouTube Music
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-airplay"></i> YouTube Kids
+                </a>
+            </div>
+            <div class="section-separator"></div>
+
+            <div class="link-section">
+                <a href="#" class="link-item">
+                    <i class="uil uil-setting"></i> Settings
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-file-medical-alt"></i> Report
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-question-circle"></i> Help
+                </a>
+                <a href="#" class="link-item">
+                    <i class="uil uil-exclamation-triangle"></i> Feedback
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <div class="content-wrapper">
+        <!-- Category List -->
+        <div class="category-list">
+            <button class="category-button active">All</button>
+            <button class="category-button">Website</button>
+            <button class="category-button">Music</button>
+            <button class="category-button">Gaming</button>
+            <button class="category-button">Node.js</button>
+            <button class="category-button">JavaScript</button>
+            <button class="category-button">React.js</button>
+            <button class="category-button">TypeScript</button>
+            <button class="category-button">Coding</button>
+            <button class="category-button">Next.js</button>
+            <button class="category-button">Data analysis</button>
+            <button class="category-button">Web design</button>
+            <button class="category-button">HTML</button>
+            <button class="category-button">Tailwind</button>
+            <button class="category-button">CSS</button>
+            <button class="category-button">Express.js</button>
+        </div>
+
+        <!-- Video List -->
+        <div class="video-list" id="video-list">
+            {% csrf_token %}
+            <style>
         
-          <!-- Swiper JS -->
-          <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-        
-          <!-- Initialize Swiper -->
-          <script>
-            var swiper = new Swiper(".mySwiper", {
-              slidesPerView: 3,
-              spaceBetween: 30,
-              loop: true,
-              pagination: {
-                el: ".swiper-pagination",
-                clickable: true,
-              },
-              navigation: {
-                nextEl: ".swiper-button-next",
-                prevEl: ".swiper-button-prev",
-              },
-            });
-          </script>
+.video {
+    width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.video img {
+    border-radius: 5px;
+    max-width: 100%;
+    height: auto;
+}
+
+#loader {
+    font-size: 18px;
+    margin: 20px 0;
+}
+#load-more {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%); /* Center the button horizontally */
+    bottom: 20px; /* Adjust this value to set how far from the bottom it should be */
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+#load-more:hover {
+    background-color: #0056b3;
+}
+
+            </style>
+<button style="opacity: 0;visibility: hidden;pointer-events: none;z-index: -100;" id="load-more">Load More</button>
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            
+            <script>
+               $(document).ready(function () {
+    const $videoList = $('#video-list'); // The container for videos
+    const $loader = $('#loader'); // Loader for the loading animation
+    const perPage = 20; // Number of videos per page
+    let currentPage = 1; // Start with the first page
+    let isFetching = false; // Flag to prevent duplicate API calls
+    let totalVideos = null; // Total videos to fetch (set after the first API response)
+
+    function renderVideos(videos) {
+        videos.forEach(video => {
+            const videoElement = `
+            <a href="/video/${video.id}" class="video-card" data-video-id="${video.id}">
+                <div class="thumbnail-container">
+                    <img src="${video.default_thumb.src}" alt="${video.title}" class="thumbnail">
+                    <p class="duration">${video.length_min}</p>
+                </div>
+                <div class="video-info">
+                    <img src="https://yt3.googleusercontent.com/LrCNrwOMkNOpLKnRl0GgvIQOgo1mR90oXa1pjbuSRIRBT3_FMTYUbdEllsUTxt7Wq8-qPOdd=s160-c-k-c0x00ffffff-no-rj"
+                        alt="Channel Logo" class="icon">
+                    <div class="video-details">
+                        <h2 class="title">${video.title}</h2>
+                        <p class="channel-name">CodingLab</p>
+                        <p class="views">${video.views} Views • ${video.rate} <b>⭐️</b></p>
+                    </div>
+                </div>
+            </a>
+            `;
+            $videoList.append(videoElement);
+        });
+    }
+
+    function fetchVideos(page) {
+        if (isFetching) return; // Prevent duplicate requests
+        isFetching = true;
+        $loader.show(); // Show the loader while fetching
+
+        $.ajax({
+            url: 'https://www.eporner.com/api/v2/video/search/',
+            data: {
+                query: 'teen boobs',
+                per_page: perPage,
+                page: page,
+                thumbsize: 'big',
+                order: 'top-weekly',
+                gay: 1,
+                lq: 1,
+                format: 'json',
+            },
+            method: 'GET',
+            success: function (response) {
+                if (!totalVideos) totalVideos = response.total_count; // Set total videos on the first response
+                if (response.videos && response.videos.length > 0) {
+                    renderVideos(response.videos); // Render fetched videos
+                    currentPage++; // Move to the next page
+                    isFetching = false; // Reset the flag
+                }
+
+                // Stop loading if we've fetched all videos
+                if (currentPage > Math.ceil(totalVideos / perPage)) {
+                    $('#load-more').hide(); // Hide Load More button if no more videos to load
+                    $loader.hide(); // Hide the loader
+                }
+
+                $.ajax({
+                    headers: {
+                        'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val(),
+                    },
+                    url: '/save-video-data/',  // Your endpoint to save data
+                    method: 'POST',
+                    data: JSON.stringify(response),  // Send the whole response
+                    contentType: 'application/json',
+ 
+                    success: function () {
+                        console.log('Video data saved successfully');
+                    },
+                    error: function (error) {
+                        console.error('Error saving video data:', error);
+                    }
+                });
+            },
+            error: function (error) {
+                console.error('Error fetching videos:', error);
+                isFetching = false; // Reset the flag on error
+                $loader.hide(); // Hide the loader
+            },
+        });
+    }
+
+    // Load More Button click event
+    $('#load-more').on('click', function () {
+        fetchVideos(currentPage); // Fetch the next set of videos
+    });
+
+    // Initial fetch
+    fetchVideos(currentPage);
+});
+
+var isLoading = false;
+
+$('.content-wrapper').on('scroll', function() {
+    var scrollPosition = $(this).scrollTop();
+    var contentHeight = $(this)[0].scrollHeight;
+    var wrapperHeight = $(this).outerHeight();
+
+    // Check if scrolled to 90% and not currently loading content
+    if ((scrollPosition + wrapperHeight) / contentHeight >= 0.9 && !isLoading) {
+        // Set flag to prevent multiple clicks while loading
+        isLoading = true;
+
+        // Trigger button click (simulate loading new content)
+        $('#load-more').click();
+        console.log("Scrolled to 90% of the content-wrapper and clicked the button.");
+
+        // Simulate loading new content
+        setTimeout(function() {
+            loadNewContent();
+        }, 1000); // Simulate 1 second of loading time
+    }
+});
+
+// Function to load new content
+function loadNewContent() {
+    // Example: Add some new content to the content-wrapper
+    var newContent = $('<div class="new-content">New Content Loaded</div>');
+    $('.content-wrapper').append(newContent);
+
+    // Reset loading flag after content is loaded
+    isLoading = false;
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const videoCards = document.querySelectorAll('.video-card');
+    videoCards.forEach(card => {
+        const videoId = card.getAttribute('data-id');
+        if (videoId) {
+            card.setAttribute('href', `/video/${videoId}`);
+        }
+    });
+});
+
+
+            </script>
+
+
+        </div>
     </div>
-</div>
+</main>
+
+
 
 {% endblock content %}

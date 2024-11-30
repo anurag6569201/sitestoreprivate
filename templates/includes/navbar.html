@@ -1,48 +1,37 @@
 {% load static %}
-<nav class="navbar navbar-expand-lg" style="z-index: 10000;">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#" style="z-index: 10005;">
-        <img src="{% static 'assets/img/home/logo_light.png' %}" alt="logo_light" width="70"><span class="logo_name">SiteStore</span>
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+<!-- Header / Navbar -->
+<header>
+  <nav class="navbar" style="flex-wrap:nowrap">
+    <div class="nav-section nav-left">
+      <button class="nav-button menu-button">
+        <i class="uil uil-bars"></i>
       </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="width: 100%;justify-content: left;gap: 25px;">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#home">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="#contact">Category</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="#about">Trending</a>
-          </li>
-        </ul>
-        <form class="d-flex right_nav_icons">      
-            <span class="nav_search right_icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#444" class="bi bi-search" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-              </svg>
-            </span>
-            <span class="nav_fvt right_icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#444" class="bi bi-star-fill" viewBox="0 0 16 16">
-                <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-              </svg>
-            </span>
-            <span class="nav_help right_icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#444" class="bi bi-question-circle" viewBox="0 0 16 16">
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286m1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94"/>
-              </svg>
-            </span>
-            <span class="nav_user right_icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="#444" class="bi bi-person-circle" viewBox="0 0 16 16">
-                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
-                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
-              </svg>
-            </span>
-        </form>
-      </div>
+      <a href="#" class="nav-logo">
+        <img src="images/logo.png" alt="Logo" class="logo-image">
+        <h2 class="logo-text">CnTube</h2>
+      </a>
+    </div>
+    
+    <div class="nav-section nav-center">
+      <form action="#" class="search-form">
+        <input type="search" placeholder="Search" class="search-input" required>
+        <button class="nav-button search-button">
+          <i class="uil uil-search"></i>
+        </button>
+      </form>
+      <button class="nav-button mic-button">
+        <i class="uil uil-microphone"></i>
+      </button>
+    </div>
+    
+    <div class="nav-section nav-right">
+      <button class="nav-button search-button">
+        <i class="uil uil-search"></i>
+      </button>
+      <button class="nav-button theme-button">
+        <i class="uil uil-moon"></i>
+      </button>
+      <img src="images/user.jpg"  class="user-image">
     </div>
   </nav>
+</header>
