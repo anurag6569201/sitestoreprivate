@@ -327,11 +327,17 @@ body.sidebar-hidden .main-layout .sidebar {
 .video-list .video-card .channel-name {
   margin: 0.25rem 0 0.15rem;
 }
+.smaller_device_search_navbar{
+  display: none;
+}
 
 /* Responsive media code for small devices */
 @media (max-width: 768px) {
   .navbar .nav-center {
     display: none;
+  }
+  .smaller_device_search_navbar.active{
+    display: flex;
   }
 
   .navbar .nav-right .search-button {
