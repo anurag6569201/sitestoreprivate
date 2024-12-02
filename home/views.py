@@ -183,3 +183,35 @@ def delete_video_data_on_session_expiry(sender, instance, **kwargs):
     """Delete VideoAPIResponse when the session is destroyed."""
     session_key = instance.session_key
     VideoAPIResponse.objects.filter(session_key=session_key).delete()
+
+
+
+
+
+
+
+
+
+def redtube_preview(request, id):
+    url = f'https://lust.scathach.id/redtube/get?id={id}'
+    response = requests.get(url)
+    data = response.json().get('data', {})
+    source = response.json().get('source', '')
+    assets = response.json().get('assets', [])
+    
+    default_keywords = ["boobs", "sexy", "teen18", "hot","chubby cute babe"]
+    valid_keywords = [keyword for keyword in data.get('tags', []) if keyword]
+    if len(valid_keywords) < 2:
+        valid_keywords = default_keywords
+    keywords_suggestion=random.sample(valid_keywords, 2)
+
+    recommeded_video=keywords_suggestion[0]
+    more_video=keywords_suggestion[1]
+    print(more_video)
+    return render(request, 'home/redtube_preview.html', {'data': data,'source': source, 'assets': assets,'more_video': more_video,'recommeded_video':recommeded_video,})
+
+def redtube(request):
+    context={
+    }
+    return render(request, 'home/redtube.html',context)
+

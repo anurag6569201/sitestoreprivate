@@ -1,19 +1,61 @@
 <!-- Category List -->
 <div class="category-list">
-    <button class="category-button active">All</button>
-    <button class="category-button">Website</button>
-    <button class="category-button">Music</button>
-    <button class="category-button">Gaming</button>
-    <button class="category-button">Node.js</button>
-    <button class="category-button">JavaScript</button>
-    <button class="category-button">React.js</button>
-    <button class="category-button">TypeScript</button>
-    <button class="category-button">Coding</button>
-    <button class="category-button">Next.js</button>
-    <button class="category-button">Data analysis</button>
-    <button class="category-button">Web design</button>
-    <button class="category-button">HTML</button>
-    <button class="category-button">Tailwind</button>
-    <button class="category-button">CSS</button>
-    <button class="category-button">Express.js</button>
+    {% for keyword in keywords %}
+    <button type="button" class="category-button" 
+            data-keyword="{{ keyword|escapejs }}" 
+            onclick="selectKeyword(this, '{{ keyword|escapejs }}')">
+        {{ keyword }}
+    </button>
+    {% endfor %}
 </div>
+
+<script>
+    // Function to handle button clicks
+    function selectKeyword(button, keyword) {
+        try {
+            const searchInput = document.querySelector('.search-input');
+            const searchForm = document.querySelector('.search-form');
+
+            if (searchInput && searchForm) {
+                searchInput.value = keyword;
+
+                // Store the selected keyword in local storage
+                localStorage.setItem('activeKeyword', keyword);
+
+                // Update active button
+                updateActiveButton(button);
+                
+                // Automatically submit the form
+                searchForm.submit();
+            }
+        } catch (error) {
+            console.error('Error selecting keyword:', error);
+        }
+    }
+
+    // Function to update the active button
+    function updateActiveButton(activeButton = null) {
+        // Remove active class from all buttons
+        document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
+
+        if (activeButton) {
+            // Add active class to the provided button
+            activeButton.classList.add('active');
+        } else {
+            // Retrieve the active keyword from local storage
+            const activeKeyword = localStorage.getItem('activeKeyword');
+            if (activeKeyword) {
+                // Find the matching button and set it as active
+                const matchingButton = document.querySelector(`.category-button[data-keyword="${activeKeyword}"]`);
+                if (matchingButton) {
+                    matchingButton.classList.add('active');
+                }
+            }
+        }
+    }
+
+    // On page load, set the active button from local storage
+    document.addEventListener('DOMContentLoaded', () => {
+        updateActiveButton();
+    });
+</script>

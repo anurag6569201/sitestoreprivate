@@ -22,3 +22,4 @@ class VideoAPIResponse(models.Model):
     session_key = models.CharField(max_length=255, unique=True)
     response_data = models.TextField()  # Field to store the JSON response
     created_at = models.DateTimeField(auto_now_add=True)
+

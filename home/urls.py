@@ -8,4 +8,7 @@ urlpatterns = [
     path('api/videos/', views.get_videos, name='get_videos'),
     path('video/<str:id>', views.main_preview, name='main_preview'),
     path('save-video-data/', views.save_video_data, name='save_video_data'),
+
+    path('redtube', views.redtube, name='redtube'),
+    path('redtube/<str:id>', views.redtube_preview, name='redtube_preview'),
 ]

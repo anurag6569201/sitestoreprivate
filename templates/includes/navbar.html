@@ -6,9 +6,8 @@
       <button class="nav-button menu-button">
         <i class="uil uil-bars"></i>
       </button>
-      <a href="#" class="nav-logo">
-        <img src="images/logo.png" alt="Logo" class="logo-image">
-        <h2 class="logo-text">CnTube</h2>
+      <a href="{% url 'home:home' %}" class="nav-logo">
+        <img src="../../static/assets/img/home/logo.png" alt="Logo" class="logo-image" style="width: 190px;">
       </a>
     </div>
     
@@ -28,10 +27,6 @@
           </button>
         </form>
       {% endif %}
-
-      <button class="nav-button mic-button">
-        <i class="uil uil-microphone"></i>
-      </button>
     </div>
 
     <div class="nav-section nav-right">
@@ -41,7 +36,6 @@
       <button class="nav-button theme-button">
         <i class="uil uil-moon"></i>
       </button>
-      <img src="images/user.jpg"  class="user-image">
     </div>
   </nav>
 </header>
