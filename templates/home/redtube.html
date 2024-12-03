@@ -82,21 +82,23 @@ SiteStore | Home
                     let currentPage = 1; // Start with the first page
                     let isFetching = false; // Flag to prevent duplicate API calls
                     let totalVideos = null; // Total videos to fetch (set after the first API response)
-            
+
                     const urlParams = new URLSearchParams(window.location.search);
-                    let searchQuery = urlParams.get('query') || 'hot teen';
-            
+                    let searchQuery = urlParams.get('query') || 'teen';
+
                     function removeQueryFromUrl() {
                         const newUrl = window.location.origin + window.location.pathname;
                         history.replaceState(null, '', newUrl);
                     }
-            
+
                     function renderVideos(videos) {
-                        videos.forEach(({ link, id, title, image, duration, views }) => {
+                        videos.forEach(({ video }) => {
+                            const { video_id, title, thumb, duration, views, rating } = video; // Extracting necessary properties from video object
+                            
                             const videoElement = `
-                                <a href="/redtube/${id}" class="video-card" data-video-id="${id}">
+                                <a href="redtube/${video_id}" class="video-card" data-video-id="${video_id}">
                                     <div class="thumbnail-container">
-                                        <img src="${image}" alt="${title}" class="thumbnail">
+                                        <img src="${thumb}" alt="${title}" class="thumbnail">
                                         <p class="duration">${duration}</p>
                                     </div>
                                     <div class="video-info">
@@ -104,8 +106,9 @@ SiteStore | Home
                                             alt="Channel Logo" class="icon">
                                         <div class="video-details">
                                             <h2 class="title">${title}</h2>
-                                            <p class="channel-name">CodingLab</p>
-                                            <p class="views">${views}</p>
+                                            <p class="channel-name">RedTube Channel</p>
+                                            <p class="views">${views} views</p>
+                                            <p class="rating">Rating: ${rating ? rating : 'N/A'}</p> <!-- Showing rating if available -->
                                         </div>
                                     </div>
                                 </a>
@@ -113,35 +116,43 @@ SiteStore | Home
                             $videoList.append(videoElement);
                         });
                     }
-            
+
                     function fetchVideos(page, query) {
                         if (isFetching) return; // Prevent duplicate requests
                         isFetching = true;
                         $loader.show();
-            
+
                         $.ajax({
-                            url: 'https://lust.scathach.id/redtube/search',
-                            data: { key: query, page: page },
+                            headers: { 'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val() },
+                            url: '/proxy-redtube-api/',  // Make the request to the Django proxy endpoint
+                            data: { 
+                                search: query, 
+                                thumbsize: 'big',
+                                page: page
+                            },
                             method: 'GET',
                             success: function (response) {
-                                if (response.success && response.data && response.data.length > 0) {
-                                    if (!totalVideos) totalVideos = response.data.length; // Estimate total count if needed
-                                    renderVideos(response.data);
+                                console.log(response);
+                                // Assuming the response data is under the 'videos' key
+                                if (response.videos && response.videos.length > 0) {
+                                    if (!totalVideos) totalVideos = response.videos.length; // Estimate total count if needed
+                                    renderVideos(response.videos); // Pass the actual video array here
                                     currentPage++;
                                     isFetching = false;
                                 } else {
-                                    $('#load-more').hide();
+                                    $('#load-more').hide(); // Hide the load more button if no videos are available
                                 }
-                                $loader.hide();
-                                removeQueryFromUrl();
-            
-                                // Save video data to the server
+                                $loader.hide(); // Hide the loader
+                                removeQueryFromUrl(); // Remove query parameters from URL
                                 $.ajax({
-                                    headers: { 'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val() },
-                                    url: '/save-video-data/',
+                                    headers: {
+                                        'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val(),
+                                    },
+                                    url: '/save-video-data/',  // Your endpoint to save data
                                     method: 'POST',
-                                    data: JSON.stringify(response.data),
+                                    data: JSON.stringify(response),  // Send the whole response
                                     contentType: 'application/json',
+
                                     success: function () {
                                         console.log('Video data saved successfully');
                                     },
@@ -157,33 +168,39 @@ SiteStore | Home
                             }
                         });
                     }
-            
+
+                    // Load more videos when the button is clicked
                     $('#load-more').on('click', function () {
                         fetchVideos(currentPage, searchQuery);
                     });
-            
+
+                    // Initially fetch the first set of videos
                     fetchVideos(currentPage, searchQuery);
-            
+
+                    // Handle search form submission
                     $('.search-form').on('submit', function (e) {
                         e.preventDefault();
                         const searchInput = $('.search-input').val().trim();
-                        searchQuery = searchInput || 'hot teen';
-                        $videoList.empty();
-                        currentPage = 1;
-                        totalVideos = null;
-                        fetchVideos(currentPage, searchQuery);
+                        searchQuery = searchInput || 'teen'; // Default to 'teen' if the input is empty
+                        $videoList.empty(); // Clear current videos
+                        currentPage = 1; // Reset to the first page
+                        totalVideos = null; // Reset total video count
+                        fetchVideos(currentPage, searchQuery); // Fetch new videos based on the search query
                     });
-            
+
+                    // Infinite scrolling logic
                     $('.content-wrapper').on('scroll', function () {
                         const scrollPosition = $(this).scrollTop();
                         const contentHeight = $(this)[0].scrollHeight;
                         const wrapperHeight = $(this).outerHeight();
-            
+
+                        // Trigger video fetch when user scrolls close to the bottom of the page
                         if ((scrollPosition + wrapperHeight) / contentHeight >= 0.9 && !isFetching) {
                             fetchVideos(currentPage, searchQuery);
                         }
                     });
                 });
+
             </script>
         </div>
     </div>

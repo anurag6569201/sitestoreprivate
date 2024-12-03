@@ -1,0 +1,195 @@
+{% extends "partials/landing_base.html" %}
+{% load static %}
+
+{% block head_title %}
+SiteStore | Home
+{% endblock head_title %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="{% static 'assets/css/home/home.css' %}">
+{% endblock stylesheet %}
+
+{% block content %}
+
+{% include 'includes/navbar.html' %}
+
+
+<!-- Main Layout -->
+<main class="main-layout">
+    <div class="screen-overlay"></div>
+
+    <!-- Sidebar -->
+    {% include 'includes/sidebar.html' %}
+
+    <div class="content-wrapper">
+        <!-- Category List -->
+        {% include 'includes/category.html' %}
+
+        <!-- Video List -->
+        <div class="video-list" id="video-list">
+            {% csrf_token %}
+            <style>
+                .video {
+                    width: 300px;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                    padding: 10px;
+                    text-align: center;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                }
+            
+                .video img {
+                    border-radius: 5px;
+                    max-width: 100%;
+                    height: auto;
+                }
+            
+                #loader {
+                    font-size: 18px;
+                    margin: 20px 0;
+                }
+            
+                #load-more {
+                    position: fixed;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    /* Center the button horizontally */
+                    bottom: 20px;
+                    /* Adjust this value to set how far from the bottom it should be */
+                    padding: 10px 20px;
+                    background-color: #007bff;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    z-index: 1000;
+                    /* Ensure it's above other content */
+                }
+            
+                #load-more:hover {
+                    background-color: #0056b3;
+                }
+            </style>
+            <button style="opacity: 0;visibility: hidden;pointer-events: none;z-index: -100;" id="load-more">Load More</button>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script>
+                $(document).ready(function () {
+                    const $videoList = $('#video-list'); // The container for videos
+                    const $loader = $('#loader'); // Loader for the loading animation
+                    const perPage = 30; // Number of videos per page
+                    let currentPage = 1; // Start with the first page
+                    let isFetching = false; // Flag to prevent duplicate API calls
+                    let totalVideos = null; // Total videos to fetch (set after the first API response)
+            
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let searchQuery = urlParams.get('query') || 'hot teen';
+            
+                    function removeQueryFromUrl() {
+                        const newUrl = window.location.origin + window.location.pathname;
+                        history.replaceState(null, '', newUrl);
+                    }
+            
+                    function renderVideos(videos) {
+                        videos.forEach(({ link, id, title, image, duration, views }) => {
+                            id = id.split("videos/")[1].split("\"")[0];
+                            const videoElement = `
+                                <a href="/xhamster/${id}" class="video-card" data-video-id="${id}">
+                                    <div class="thumbnail-container">
+                                        <img src="${image}" alt="${title}" class="thumbnail">
+                                        <p class="duration">${duration}</p>
+                                    </div>
+                                    <div class="video-info">
+                                        <img src="https://yt3.googleusercontent.com/LrCNrwOMkNOpLKnRl0GgvIQOgo1mR90oXa1pjbuSRIRBT3_FMTYUbdEllsUTxt7Wq8-qPOdd=s160-c-k-c0x00ffffff-no-rj"
+                                            alt="Channel Logo" class="icon">
+                                        <div class="video-details">
+                                            <h2 class="title">${title}</h2>
+                                            <p class="channel-name">CodingLab</p>
+                                            <p class="views">${views}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            `;
+                            $videoList.append(videoElement);
+                        });
+                    }
+            
+                    function fetchVideos(page, query) {
+                        if (isFetching) return; // Prevent duplicate requests
+                        isFetching = true;
+                        $loader.show();
+            
+                        $.ajax({
+                            url: 'https://lust.scathach.id/xhamster/search',
+                            data: { key: query, page: page },
+                            method: 'GET',
+                            success: function (response) {
+                                if (response.success && response.data && response.data.length > 0) {
+                                    if (!totalVideos) totalVideos = response.data.length; // Estimate total count if needed
+                                    renderVideos(response.data);
+                                    currentPage++;
+                                    isFetching = false;
+                                } else {
+                                    $('#load-more').hide();
+                                }
+                                $loader.hide();
+                                removeQueryFromUrl();
+            
+                                // Save video data to the server
+                                $.ajax({
+                                    headers: { 'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val() },
+                                    url: '/save-video-data/',
+                                    method: 'POST',
+                                    data: JSON.stringify(response.data),
+                                    contentType: 'application/json',
+                                    success: function () {
+                                        console.log('Video data saved successfully');
+                                    },
+                                    error: function (error) {
+                                        console.error('Error saving video data:', error);
+                                    }
+                                });
+                            },
+                            error: function (error) {
+                                console.error('Error fetching videos:', error);
+                                isFetching = false;
+                                $loader.hide();
+                            }
+                        });
+                    }
+            
+                    $('#load-more').on('click', function () {
+                        fetchVideos(currentPage, searchQuery);
+                    });
+            
+                    fetchVideos(currentPage, searchQuery);
+            
+                    $('.search-form').on('submit', function (e) {
+                        e.preventDefault();
+                        const searchInput = $('.search-input').val().trim();
+                        searchQuery = searchInput || 'hot teen';
+                        $videoList.empty();
+                        currentPage = 1;
+                        totalVideos = null;
+                        fetchVideos(currentPage, searchQuery);
+                    });
+            
+                    $('.content-wrapper').on('scroll', function () {
+                        const scrollPosition = $(this).scrollTop();
+                        const contentHeight = $(this)[0].scrollHeight;
+                        const wrapperHeight = $(this).outerHeight();
+            
+                        if ((scrollPosition + wrapperHeight) / contentHeight >= 0.9 && !isFetching) {
+                            fetchVideos(currentPage, searchQuery);
+                        }
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</main>
+
+
+
+{% endblock content %}

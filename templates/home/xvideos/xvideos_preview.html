@@ -1,0 +1,255 @@
+{% extends "partials/landing_base.html" %}
+{% load static %}
+
+{% block head_title %}
+SiteStore | Home
+{% endblock head_title %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="{% static 'assets/css/home/home.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/home/single.css' %}">
+<style>
+    .recommeded_videos a{
+        text-decoration: none !important;
+    }
+</style>
+{% endblock stylesheet %}
+{% block content %}
+
+{% include 'includes/navbar.html' %}
+
+<!-- Main Layout -->
+<main class="main-layout">
+    <div class="screen-overlay"></div>
+    {% include 'includes/sidebar.html' %}
+
+    <div class="content-wrapper">
+
+        <!-- Video List -->
+        <div>
+
+            <div class="container-fluid mt-3">
+                <div class="row">
+                    <!-- Video Player Section -->
+                    <div class="col-lg-8">
+                        <div class="video-player ratio ratio-16x9 mb-3">
+                            <iframe id="video-frame" src="{{ assets.0 }}" class="w-100 h-100 object-fit-cover" frameborder="0" allowfullscreen>
+                            </iframe>
+                            <a href="{{source}}" target="_blank">
+                                <img id="fallback-image" src="{{ assets.1 }}" alt="Video Thumbnail" class="w-100 h-100 object-fit-cover" style="display:none;">
+                            </a>
+                            
+                            <script>
+                                    const iframe = document.getElementById('video-frame');
+                                    const fallbackImage = document.getElementById('fallback-image');
+                                    
+                                    // Check if the iframe is blocked by testing the iframe content
+                                    try {
+                                        const iframeContent = iframe.contentWindow.document.body;
+                                        if (!iframeContent) {
+                                            // If iframe content is not accessible, show the fallback image
+                                            iframe.style.display = 'none';
+                                            fallbackImage.style.display = 'block';
+                                        }
+                                    } catch (e) {
+                                        // If access to iframe content is blocked, show the fallback image
+                                        iframe.style.display = 'none';
+                                        fallbackImage.style.display = 'block';
+                                    }
+                            </script>
+                            
+                        </div>
+
+
+                        <!-- Video Info -->
+                        <h5 class="mb-3">{{ data.title }}</h5>
+
+                    </div>
+
+                    <!-- Recommended Videos -->
+                    <div class="col-lg-4">
+                        <h6 class="mb-3">Tags Of videos</h6>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                            <div class="d-flex gap-2 flex-wrap">
+                                {% for keyword in data.tags %}
+                                <button class="action-button">
+                                    {{ keyword }}
+                                </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- New Row for Overflow Recommended Videos -->
+                <div class="content-wrapper">
+                    <h6 class="mb-3">More Recommended Videos</h6>
+                    <div class="video-list" id="video-list">
+
+                    </div>
+                </div>
+            </div>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            
+
+            <button style="opacity: 0;visibility: hidden;pointer-events: none;z-index: -100;" id="load-more">Load
+                More</button>
+            <script>
+                $(document).ready(function () {
+                    const $videoList = $('#video-list'); // The container for videos
+                    const $loader = $('#loader'); // Loader for the loading animation
+                    const perPage = 30; // Number of videos per page
+                    let currentPage = 1; // Start with the first page
+                    let isFetching = false; // Flag to prevent duplicate API calls
+                    let totalVideos = null; // Total videos to fetch (set after the first API response)
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let searchQuery = urlParams.get('query') || '{{ more_video|escapejs }}' || 'hot teen';
+                    function removeQueryFromUrl() {
+                        const newUrl = window.location.origin + window.location.pathname;
+                        history.replaceState(null, '', newUrl);
+                    }
+            
+                    function renderVideos(videos) {
+                        videos.forEach(({ link, id, title, image, duration, views }) => {
+                            const videoElement = `
+                                <a href="/xvideos${id}" class="video-card" data-video-id="${id}">
+                                    <div class="thumbnail-container">
+                                        <img src="${image}" alt="${title}" class="thumbnail">
+                                        <p class="duration">${duration}</p>
+                                    </div>
+                                    <div class="video-info">
+                                        <img src="https://yt3.googleusercontent.com/LrCNrwOMkNOpLKnRl0GgvIQOgo1mR90oXa1pjbuSRIRBT3_FMTYUbdEllsUTxt7Wq8-qPOdd=s160-c-k-c0x00ffffff-no-rj"
+                                            alt="Channel Logo" class="icon">
+                                        <div class="video-details">
+                                            <h2 class="title">${title}</h2>
+                                            <p class="channel-name">CodingLab</p>
+                                            <p class="views">${views}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            `;
+                            $videoList.append(videoElement);
+                        });
+                    }
+            
+                    function fetchVideos(page, query) {
+                        if (isFetching) return; // Prevent duplicate requests
+                        isFetching = true;
+                        $loader.show();
+            
+                        $.ajax({
+                            url: 'https://lust.scathach.id/xvideos/search',
+                            data: { key: query, page: page },
+                            method: 'GET',
+                            success: function (response) {
+                                if (response.success && response.data && response.data.length > 0) {
+                                    if (!totalVideos) totalVideos = response.data.length; // Estimate total count if needed
+                                    renderVideos(response.data);
+                                    currentPage++;
+                                    isFetching = false;
+                                } else {
+                                    $('#load-more').hide();
+                                }
+                                $loader.hide();
+                                removeQueryFromUrl();
+            
+                                // Save video data to the server
+                                $.ajax({
+                                    headers: { 'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val() },
+                                    url: '/save-video-data/',
+                                    method: 'POST',
+                                    data: JSON.stringify(response.data),
+                                    contentType: 'application/json',
+                                    success: function () {
+                                        console.log('Video data saved successfully');
+                                    },
+                                    error: function (error) {
+                                        console.error('Error saving video data:', error);
+                                    }
+                                });
+                            },
+                            error: function (error) {
+                                console.error('Error fetching videos:', error);
+                                isFetching = false;
+                                $loader.hide();
+                            }
+                        });
+                    }
+            
+                    $('#load-more').on('click', function () {
+                        fetchVideos(currentPage, searchQuery);
+                    });
+            
+                    fetchVideos(currentPage, searchQuery);
+            
+                    $('.search-form').on('submit', function (e) {
+                        e.preventDefault();
+                        const searchInput = $('.search-input').val().trim();
+                        searchQuery = searchInput || 'hot teen';
+                        $videoList.empty();
+                        currentPage = 1;
+                        totalVideos = null;
+                        fetchVideos(currentPage, searchQuery);
+                    });
+            
+                    $('.content-wrapper').on('scroll', function () {
+                        const scrollPosition = $(this).scrollTop();
+                        const contentHeight = $(this)[0].scrollHeight;
+                        const wrapperHeight = $(this).outerHeight();
+            
+                        if ((scrollPosition + wrapperHeight) / contentHeight >= 0.9 && !isFetching) {
+                            fetchVideos(currentPage, searchQuery);
+                        }
+                    });
+                });
+
+                var isLoading = false;
+
+                $('.content-wrapper').on('scroll', function () {
+                    var scrollPosition = $(this).scrollTop();
+                    var contentHeight = $(this)[0].scrollHeight;
+                    var wrapperHeight = $(this).outerHeight();
+
+                    // Check if scrolled to 90% and not currently loading content
+                    if ((scrollPosition + wrapperHeight) / contentHeight >= 0.9 && !isLoading) {
+                        // Set flag to prevent multiple clicks while loading
+                        isLoading = true;
+
+                        // Trigger button click (simulate loading new content)
+                        $('#load-more').click();
+                        console.log("Scrolled to 90% of the content-wrapper and clicked the button.");
+
+                        // Simulate loading new content
+                        setTimeout(function () {
+                            loadNewContent();
+                        }, 10); // Simulate 1 second of loading time
+                    }
+                });
+
+                // Function to load new content
+                function loadNewContent() {
+                    // Example: Add some new content to the content-wrapper
+                    var newContent = $('<div class="new-content">New Content Loaded</div>');
+                    $('.content-wrapper').append(newContent);
+
+                    // Reset loading flag after content is loaded
+                    isLoading = false;
+                }
+                document.addEventListener('DOMContentLoaded', () => {
+                    const videoCards = document.querySelectorAll('.video-card');
+                    videoCards.forEach(card => {
+                        const videoId = card.getAttribute('data-id');
+                        if (videoId) {
+                            card.setAttribute('href', `/video/${videoId}`);
+                        }
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</main>
+
+
+
+{% endblock content %}

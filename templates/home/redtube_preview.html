@@ -33,53 +33,62 @@ SiteStore | Home
                     <!-- Video Player Section -->
                     <div class="col-lg-8">
                         <div class="video-player ratio ratio-16x9 mb-3">
-                            <iframe id="video-frame" src="{{ assets.0 }}" class="w-100 h-100 object-fit-cover" frameborder="0" allowfullscreen>
-                            </iframe>
-                            <a href="{{source}}" target="_blank">
-                                <img id="fallback-image" src="{{ assets.1 }}" alt="Video Thumbnail" class="w-100 h-100 object-fit-cover" style="display:none;">
+                            <a href="{{specified_video.url}}" target="_blank">
+                                <img id="fallback-image" src="{{ specified_video.default_thumb }}" alt="Video Thumbnail" class="w-100 h-100 object-fit-cover" style="display:block;">
                             </a>
-                            
-                            <script>
-                                window.onload = function() {
-                                    const iframe = document.getElementById('video-frame');
-                                    const fallbackImage = document.getElementById('fallback-image');
-                                    
-                                    // Check if the iframe is blocked by testing the iframe content
-                                    try {
-                                        const iframeContent = iframe.contentWindow.document.body;
-                                        if (!iframeContent) {
-                                            // If iframe content is not accessible, show the fallback image
-                                            iframe.style.display = 'none';
-                                            fallbackImage.style.display = 'block';
-                                        }
-                                    } catch (e) {
-                                        // If access to iframe content is blocked, show the fallback image
-                                        iframe.style.display = 'none';
-                                        fallbackImage.style.display = 'block';
-                                    }
-                                }
-                            </script>
                             
                         </div>
 
 
                         <!-- Video Info -->
-                        <h5 class="mb-3">{{ data.title }}</h5>
+                        <h5 class="mb-3">{{specified_video.title}}</h5>
 
-                    </div>
-
-                    <!-- Recommended Videos -->
-                    <div class="col-lg-4">
-                        <h6 class="mb-3">Tags Of videos</h6>
                         <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
                             <div class="d-flex gap-2 flex-wrap">
-                                {% for keyword in data.tags %}
+                                {% for keyword in specified_video.keywords %}
                                 <button class="action-button">
                                     {{ keyword }}
                                 </button>
                                 {% endfor %}
                             </div>
                         </div>
+
+                        <!-- Comments Section -->
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between mb-4">
+                                <h5>ScreenShots</h5>
+                            </div>
+
+                            <!-- Comment -->
+                            <div class="d-flex gap-3 mb-4">
+                                <div class="row row-cols-1 row-cols-md-3 g-4">
+                                    {% for screenshots in specified_video.thumbs %}
+                                    <div class="col">
+                                        <div class="card h-100">
+                                            <img src="{{screenshots.src}}" class="card-img-top" alt="...">
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Recommended Videos -->
+                    <div class="col-lg-4">
+                        <h6 class="mb-3">Recommended videos</h6>
+
+                        <!-- Video Card -->
+                        <div class="recommeded-videos-container" id="recommendedVideos">
+                            <div class="recommeded_videos" id="recommeded_videos">
+
+                            </div>
+                        </div>
+
+
+                        <button style="opacity: 0;visibility: hidden;pointer-events: none;z-index: -100;"
+                            id="load-more">Load More</button>
                     </div>
                 </div>
                 <!-- New Row for Overflow Recommended Videos -->
@@ -92,41 +101,30 @@ SiteStore | Home
             </div>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
             <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            
-
-            <button style="opacity: 0;visibility: hidden;pointer-events: none;z-index: -100;" id="load-more">Load
-                More</button>
             <script>
                 $(document).ready(function () {
-                    const $videoList = $('#video-list'); // The container for videos
+                    const $videoList = $('#recommeded_videos'); // The container for videos
                     const $loader = $('#loader'); // Loader for the loading animation
-                    const perPage = 30; // Number of videos per page
+                    const perPage = 14; // Number of videos per page
                     let currentPage = 1; // Start with the first page
                     let isFetching = false; // Flag to prevent duplicate API calls
                     let totalVideos = null; // Total videos to fetch (set after the first API response)
-                    
-                    const urlParams = new URLSearchParams(window.location.search);
-                    let searchQuery = urlParams.get('query') || '{{ more_video|escapejs }}' || 'hot teen';
-                    function removeQueryFromUrl() {
-                        const newUrl = window.location.origin + window.location.pathname;
-                        history.replaceState(null, '', newUrl);
-                    }
-            
+
                     function renderVideos(videos) {
-                        videos.forEach(({ link, id, title, image, duration, views }) => {
+                        videos.forEach(({ video }) => {
+                            const { video_id, title, thumb, duration, views, rating } = video; // Extracting necessary properties from video object
+                            
                             const videoElement = `
-                                <a href="/redtube/${id}" class="video-card" data-video-id="${id}">
-                                    <div class="thumbnail-container">
-                                        <img src="${image}" alt="${title}" class="thumbnail">
-                                        <p class="duration">${duration}</p>
-                                    </div>
-                                    <div class="video-info">
-                                        <img src="https://yt3.googleusercontent.com/LrCNrwOMkNOpLKnRl0GgvIQOgo1mR90oXa1pjbuSRIRBT3_FMTYUbdEllsUTxt7Wq8-qPOdd=s160-c-k-c0x00ffffff-no-rj"
-                                            alt="Channel Logo" class="icon">
-                                        <div class="video-details">
-                                            <h2 class="title">${title}</h2>
-                                            <p class="channel-name">CodingLab</p>
-                                            <p class="views">${views}</p>
+                                <a href="${video_id}" class="video-card" data-video-id="${video_id}">
+                                    <div class="row g-0">
+                                            <div class="col-5">
+                                                <img src="${thumb}" alt="${title}" class="w-100 h-100 object-fit-cover">
+                                            </div>
+                                            <div class="col-7 ps-2">
+                                                <h6 class="video-title">${title}</h6>
+                                                <div class="channel-name">Khudgharz</div>
+                                                <div class="video-stats">${views} Views • ${rating} <b>⭐️</b></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </a>
@@ -134,35 +132,43 @@ SiteStore | Home
                             $videoList.append(videoElement);
                         });
                     }
-            
+
                     function fetchVideos(page, query) {
                         if (isFetching) return; // Prevent duplicate requests
                         isFetching = true;
                         $loader.show();
-            
+
                         $.ajax({
-                            url: 'https://lust.scathach.id/redtube/search',
-                            data: { key: query, page: page },
+                            headers: { 'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val() },
+                            url: '/proxy-redtube-api/',  // Make the request to the Django proxy endpoint
+                            data: { 
+                                search: query, 
+                                thumbsize: 'big',
+                                page: page
+                            },
                             method: 'GET',
                             success: function (response) {
-                                if (response.success && response.data && response.data.length > 0) {
-                                    if (!totalVideos) totalVideos = response.data.length; // Estimate total count if needed
-                                    renderVideos(response.data);
+                                console.log(response);
+                                // Assuming the response data is under the 'videos' key
+                                if (response.videos && response.videos.length > 0) {
+                                    if (!totalVideos) totalVideos = response.videos.length; // Estimate total count if needed
+                                    renderVideos(response.videos); // Pass the actual video array here
                                     currentPage++;
                                     isFetching = false;
                                 } else {
-                                    $('#load-more').hide();
+                                    $('#load-more').hide(); // Hide the load more button if no videos are available
                                 }
-                                $loader.hide();
-                                removeQueryFromUrl();
-            
-                                // Save video data to the server
+                                $loader.hide(); // Hide the loader
+                                removeQueryFromUrl(); // Remove query parameters from URL
                                 $.ajax({
-                                    headers: { 'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val() },
-                                    url: '/save-video-data/',
+                                    headers: {
+                                        'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val(),
+                                    },
+                                    url: '/save-video-data/',  // Your endpoint to save data
                                     method: 'POST',
-                                    data: JSON.stringify(response.data),
+                                    data: JSON.stringify(response),  // Send the whole response
                                     contentType: 'application/json',
+
                                     success: function () {
                                         console.log('Video data saved successfully');
                                     },
@@ -178,66 +184,12 @@ SiteStore | Home
                             }
                         });
                     }
-            
-                    $('#load-more').on('click', function () {
-                        fetchVideos(currentPage, searchQuery);
-                    });
-            
-                    fetchVideos(currentPage, searchQuery);
-            
-                    $('.search-form').on('submit', function (e) {
-                        e.preventDefault();
-                        const searchInput = $('.search-input').val().trim();
-                        searchQuery = searchInput || 'hot teen';
-                        $videoList.empty();
-                        currentPage = 1;
-                        totalVideos = null;
-                        fetchVideos(currentPage, searchQuery);
-                    });
-            
-                    $('.content-wrapper').on('scroll', function () {
-                        const scrollPosition = $(this).scrollTop();
-                        const contentHeight = $(this)[0].scrollHeight;
-                        const wrapperHeight = $(this).outerHeight();
-            
-                        if ((scrollPosition + wrapperHeight) / contentHeight >= 0.9 && !isFetching) {
-                            fetchVideos(currentPage, searchQuery);
-                        }
-                    });
+
+                    // Initial fetch
+                    fetchVideos(currentPage);
                 });
 
-                var isLoading = false;
 
-                $('.content-wrapper').on('scroll', function () {
-                    var scrollPosition = $(this).scrollTop();
-                    var contentHeight = $(this)[0].scrollHeight;
-                    var wrapperHeight = $(this).outerHeight();
-
-                    // Check if scrolled to 90% and not currently loading content
-                    if ((scrollPosition + wrapperHeight) / contentHeight >= 0.9 && !isLoading) {
-                        // Set flag to prevent multiple clicks while loading
-                        isLoading = true;
-
-                        // Trigger button click (simulate loading new content)
-                        $('#load-more').click();
-                        console.log("Scrolled to 90% of the content-wrapper and clicked the button.");
-
-                        // Simulate loading new content
-                        setTimeout(function () {
-                            loadNewContent();
-                        }, 10); // Simulate 1 second of loading time
-                    }
-                });
-
-                // Function to load new content
-                function loadNewContent() {
-                    // Example: Add some new content to the content-wrapper
-                    var newContent = $('<div class="new-content">New Content Loaded</div>');
-                    $('.content-wrapper').append(newContent);
-
-                    // Reset loading flag after content is loaded
-                    isLoading = false;
-                }
                 document.addEventListener('DOMContentLoaded', () => {
                     const videoCards = document.querySelectorAll('.video-card');
                     videoCards.forEach(card => {
@@ -247,7 +199,141 @@ SiteStore | Home
                         }
                     });
                 });
+
             </script>
+
+
+
+            <button style="opacity: 0;visibility: hidden;pointer-events: none;z-index: -100;" id="load-more">Load
+                More</button>
+                <script>
+                    $(document).ready(function () {
+                        const $videoList = $('#video-list'); // The container for videos
+                        const $loader = $('#loader'); // Loader for the loading animation
+                        const perPage = 30; // Number of videos per page
+                        let currentPage = 1; // Start with the first page
+                        let isFetching = false; // Flag to prevent duplicate API calls
+                        let totalVideos = null; // Total videos to fetch (set after the first API response)
+    
+                        const urlParams = new URLSearchParams(window.location.search);
+                        let searchQuery = urlParams.get('query') || 'teen';
+    
+                        function removeQueryFromUrl() {
+                            const newUrl = window.location.origin + window.location.pathname;
+                            history.replaceState(null, '', newUrl);
+                        }
+    
+                        function renderVideos(videos) {
+                            videos.forEach(({ video }) => {
+                                const { video_id, title, thumb, duration, views, rating } = video; // Extracting necessary properties from video object
+                                
+                                const videoElement = `
+                                    <a href="redtube/${video_id}" class="video-card" data-video-id="${video_id}">
+                                        <div class="thumbnail-container">
+                                            <img src="${thumb}" alt="${title}" class="thumbnail">
+                                            <p class="duration">${duration}</p>
+                                        </div>
+                                        <div class="video-info">
+                                            <img src="https://yt3.googleusercontent.com/LrCNrwOMkNOpLKnRl0GgvIQOgo1mR90oXa1pjbuSRIRBT3_FMTYUbdEllsUTxt7Wq8-qPOdd=s160-c-k-c0x00ffffff-no-rj"
+                                                alt="Channel Logo" class="icon">
+                                            <div class="video-details">
+                                                <h2 class="title">${title}</h2>
+                                                <p class="channel-name">RedTube Channel</p>
+                                                <p class="views">${views} views</p>
+                                                <p class="rating">Rating: ${rating ? rating : 'N/A'}</p> <!-- Showing rating if available -->
+                                            </div>
+                                        </div>
+                                    </a>
+                                `;
+                                $videoList.append(videoElement);
+                            });
+                        }
+    
+                        function fetchVideos(page, query) {
+                            if (isFetching) return; // Prevent duplicate requests
+                            isFetching = true;
+                            $loader.show();
+    
+                            $.ajax({
+                                headers: { 'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val() },
+                                url: '/proxy-redtube-api/',  // Make the request to the Django proxy endpoint
+                                data: { 
+                                    search: query, 
+                                    thumbsize: 'big',
+                                    page: page
+                                },
+                                method: 'GET',
+                                success: function (response) {
+                                    console.log(response);
+                                    // Assuming the response data is under the 'videos' key
+                                    if (response.videos && response.videos.length > 0) {
+                                        if (!totalVideos) totalVideos = response.videos.length; // Estimate total count if needed
+                                        renderVideos(response.videos); // Pass the actual video array here
+                                        currentPage++;
+                                        isFetching = false;
+                                    } else {
+                                        $('#load-more').hide(); // Hide the load more button if no videos are available
+                                    }
+                                    $loader.hide(); // Hide the loader
+                                    removeQueryFromUrl(); // Remove query parameters from URL
+                                    $.ajax({
+                                        headers: {
+                                            'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val(),
+                                        },
+                                        url: '/save-video-data/',  // Your endpoint to save data
+                                        method: 'POST',
+                                        data: JSON.stringify(response),  // Send the whole response
+                                        contentType: 'application/json',
+    
+                                        success: function () {
+                                            console.log('Video data saved successfully');
+                                        },
+                                        error: function (error) {
+                                            console.error('Error saving video data:', error);
+                                        }
+                                    });
+                                },
+                                error: function (error) {
+                                    console.error('Error fetching videos:', error);
+                                    isFetching = false;
+                                    $loader.hide();
+                                }
+                            });
+                        }
+    
+                        // Load more videos when the button is clicked
+                        $('#load-more').on('click', function () {
+                            fetchVideos(currentPage, searchQuery);
+                        });
+    
+                        // Initially fetch the first set of videos
+                        fetchVideos(currentPage, searchQuery);
+    
+                        // Handle search form submission
+                        $('.search-form').on('submit', function (e) {
+                            e.preventDefault();
+                            const searchInput = $('.search-input').val().trim();
+                            searchQuery = searchInput || 'teen'; // Default to 'teen' if the input is empty
+                            $videoList.empty(); // Clear current videos
+                            currentPage = 1; // Reset to the first page
+                            totalVideos = null; // Reset total video count
+                            fetchVideos(currentPage, searchQuery); // Fetch new videos based on the search query
+                        });
+    
+                        // Infinite scrolling logic
+                        $('.content-wrapper').on('scroll', function () {
+                            const scrollPosition = $(this).scrollTop();
+                            const contentHeight = $(this)[0].scrollHeight;
+                            const wrapperHeight = $(this).outerHeight();
+    
+                            // Trigger video fetch when user scrolls close to the bottom of the page
+                            if ((scrollPosition + wrapperHeight) / contentHeight >= 0.9 && !isFetching) {
+                                fetchVideos(currentPage, searchQuery);
+                            }
+                        });
+                    });
+    
+                </script>
         </div>
     </div>
 </main>

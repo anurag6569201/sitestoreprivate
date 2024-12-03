@@ -193,7 +193,74 @@ def delete_video_data_on_session_expiry(sender, instance, **kwargs):
 
 
 def redtube_preview(request, id):
-    url = f'https://lust.scathach.id/redtube/get?id={id}'
+    # Define the RedTube API URL and parameters
+    redtube_api_url = 'https://api.redtube.com/'
+    params = {
+        'data': 'redtube.Videos.getVideoById',
+        'output': 'json',
+        'thumbsize': 'big',
+        'video_id':id,
+    }
+    response = requests.get(redtube_api_url, params=params)
+    data = response.json().get('video', {})
+    print(data)
+    
+    default_keywords = ["boobs", "sexy", "teen18", "hot","chubby cute babe"]
+    valid_keywords = [keyword for keyword in data.get('tags', []) if keyword]
+    if len(valid_keywords) < 2:
+        valid_keywords = default_keywords
+    keywords_suggestion=random.sample(valid_keywords, 2)
+
+    recommeded_video=keywords_suggestion[0]
+    more_video=keywords_suggestion[1]
+    print(more_video)
+    return render(request, 'home/redtube_preview.html', {'specified_video': data,'more_video': more_video,'recommeded_video':recommeded_video,})
+
+def redtube(request):
+    context={
+    }
+    return render(request, 'home/redtube.html',context)
+
+import requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def proxy_redtube_api(request):
+    # Check if the request method is GET
+    if request.method == 'GET':
+        # Get query parameters from the frontend request
+        search_query = request.GET.get('search', 'hot teen')
+        page = request.GET.get('page', 1)
+
+        # Define the RedTube API URL and parameters
+        redtube_api_url = 'https://api.redtube.com/'
+        params = {
+            'data': 'redtube.Videos.searchVideos',
+            'output': 'json',
+            'search': search_query,
+            'thumbsize': 'big',
+            'page': page
+        }
+
+        # Make a request to the RedTube API
+        response = requests.get(redtube_api_url, params=params)
+        final=response.json()
+        # If the response is successful, return the JSON data
+        if response.status_code == 200:
+            return JsonResponse(response.json())
+        else:
+            return JsonResponse({'error': 'Failed to fetch data from RedTube API'}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
+
+
+
+def pornhub_preview(request, id):
+    url = f'https://lust.scathach.id/pornhub/get?id={id}'
     response = requests.get(url)
     data = response.json().get('data', {})
     source = response.json().get('source', '')
@@ -208,10 +275,67 @@ def redtube_preview(request, id):
     recommeded_video=keywords_suggestion[0]
     more_video=keywords_suggestion[1]
     print(more_video)
-    return render(request, 'home/redtube_preview.html', {'data': data,'source': source, 'assets': assets,'more_video': more_video,'recommeded_video':recommeded_video,})
+    return render(request, 'home/pornhub/pornhub_preview.html', {'data': data,'source': source, 'assets': assets,'more_video': more_video,'recommeded_video':recommeded_video,})
 
-def redtube(request):
+def pornhub(request):
     context={
     }
-    return render(request, 'home/redtube.html',context)
+    return render(request, 'home/pornhub/pornhub.html',context)
+
+
+
+
+
+def xhamster_preview(request, id):
+    url = f'https://lust.scathach.id/xhamster/get?id=videos/{id}'
+    response = requests.get(url)
+    data = response.json().get('data', {})
+    source = response.json().get('source', '')
+    assets = response.json().get('assets', [])
+    
+    default_keywords = ["boobs", "sexy", "teen18", "hot","chubby cute babe"]
+    valid_keywords = [keyword for keyword in data.get('tags', []) if keyword]
+    if len(valid_keywords) < 2:
+        valid_keywords = default_keywords
+    keywords_suggestion=random.sample(valid_keywords, 2)
+
+    recommeded_video=keywords_suggestion[0]
+    more_video=keywords_suggestion[1]
+    print(more_video)
+    return render(request, 'home/xhamster/xhamster_preview.html', {'data': data,'source': source, 'assets': assets,'more_video': more_video,'recommeded_video':recommeded_video,})
+
+def xhamster(request):
+    context={
+    }
+    return render(request, 'home/xhamster/xhamster.html',context)
+
+
+
+
+
+
+def xvideos_preview(request, alt1,alt2):
+    url = f'https://lust.scathach.id/xvideos/get?id={alt1}/{alt2}'
+    response = requests.get(url)
+    data = response.json().get('data', {})
+    source = response.json().get('source', '')
+    assets = response.json().get('assets', [])
+    
+    default_keywords = ["boobs", "sexy", "teen18", "hot","chubby cute babe"]
+    valid_keywords = [keyword for keyword in data.get('tags', []) if keyword]
+    if len(valid_keywords) < 2:
+        valid_keywords = default_keywords
+    keywords_suggestion=random.sample(valid_keywords, 2)
+
+    recommeded_video=keywords_suggestion[0]
+    more_video=keywords_suggestion[1]
+    print(more_video)
+    return render(request, 'home/xvideos/xvideos_preview.html', {'data': data,'source': source, 'assets': assets,'more_video': more_video,'recommeded_video':recommeded_video,})
+
+def xvideos(request):
+    context={
+    }
+    return render(request, 'home/xvideos/xvideos.html',context)
+
+
 
