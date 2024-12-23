@@ -73,7 +73,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'sitestore.wsgi.application'
+WSGI_APPLICATION = 'sitestore.wsgi.app'
 
 
 # Database
