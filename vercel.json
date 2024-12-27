@@ -20,11 +20,6 @@
         "src": "/(.*)",
         "dest": "sitestore/wsgi.py"
       }
-    ],
-    "excludeFiles": [
-        "portfolio/staticfiles/**",  
-        "portfolio/tests/**",      
-        "portfolio/docs/**"         
     ]
   }
   
