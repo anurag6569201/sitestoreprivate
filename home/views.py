@@ -1,11 +1,17 @@
 from django.shortcuts import render
 from home.models import CrousalHome,VideoAPIResponse
-
+import random
 
 from django.http import JsonResponse
 import requests
 from django.core.paginator import Paginator
 import json
+
+def random_query_top():
+    default_keywords = ["latest", "longest", "shortest", "top-rated","most-popular",'top-weekly','top-monthly']
+    keywords_suggestion=random.sample(default_keywords, 1)
+    return keywords_suggestion
+
 def fetch_videos_from_api(params):
     """Fetch videos from the external API and append the response."""
     url = 'https://www.eporner.com/api/v2/video/'
@@ -58,7 +64,7 @@ def get_videos(request):
         'per_page': per_page,
         'page': page,
         'thumbsize': 'big',
-        'order': 'top-weekly',
+        'order': 'latest',
         'type.': 1,
         'lq': 1,
         'format': 'json',
@@ -85,11 +91,13 @@ def get_videos(request):
 
 
 def home(request):
+    random_order=random_query_top()
     context={
+        'order_value':random_order[0],
     }
     return render(request, 'home/home.html',context)
 
-import random
+
 
 def main_preview(request, id):
     session_key = request.session.session_key
@@ -203,7 +211,6 @@ def redtube_preview(request, id):
     }
     response = requests.get(redtube_api_url, params=params)
     data = response.json().get('video', {})
-    print(data)
     
     default_keywords = ["boobs", "sexy", "teen18", "hot","chubby cute babe"]
     valid_keywords = [keyword for keyword in data.get('tags', []) if keyword]
@@ -213,7 +220,6 @@ def redtube_preview(request, id):
 
     recommeded_video=keywords_suggestion[0]
     more_video=keywords_suggestion[1]
-    print(more_video)
     return render(request, 'home/redtube_preview.html', {'specified_video': data,'more_video': more_video,'recommeded_video':recommeded_video,})
 
 def redtube(request):
@@ -274,7 +280,6 @@ def pornhub_preview(request, id):
 
     recommeded_video=keywords_suggestion[0]
     more_video=keywords_suggestion[1]
-    print(more_video)
     return render(request, 'home/pornhub/pornhub_preview.html', {'data': data,'source': source, 'assets': assets,'more_video': more_video,'recommeded_video':recommeded_video,})
 
 def pornhub(request):
@@ -301,7 +306,6 @@ def xhamster_preview(request, id):
 
     recommeded_video=keywords_suggestion[0]
     more_video=keywords_suggestion[1]
-    print(more_video)
     return render(request, 'home/xhamster/xhamster_preview.html', {'data': data,'source': source, 'assets': assets,'more_video': more_video,'recommeded_video':recommeded_video,})
 
 def xhamster(request):
@@ -329,7 +333,6 @@ def xvideos_preview(request, alt1,alt2):
 
     recommeded_video=keywords_suggestion[0]
     more_video=keywords_suggestion[1]
-    print(more_video)
     return render(request, 'home/xvideos/xvideos_preview.html', {'data': data,'source': source, 'assets': assets,'more_video': more_video,'recommeded_video':recommeded_video,})
 
 def xvideos(request):

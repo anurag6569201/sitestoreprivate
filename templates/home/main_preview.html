@@ -98,8 +98,8 @@ SiteStore | Home
                     </div>
                 </div>
             </div>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="{% static 'assets/js/home/lodash.min.js' %}"></script>
+            <script src="{% static 'assets/js/home/jquery.min.js' %}"></script>
             <script>
                 $(document).ready(function () {
                     const $videoList = $('#recommeded_videos'); // The container for videos
@@ -142,7 +142,7 @@ SiteStore | Home
                                 per_page: perPage,
                                 page: page,
                                 thumbsize: 'big',
-                                order: 'top-weekly',
+                                order: 'latest',
                                 gay: 1,
                                 lq: 1,
                                 format: 'json',
@@ -252,7 +252,7 @@ SiteStore | Home
                                 per_page: perPage,
                                 page: page,
                                 thumbsize: 'big',
-                                order: 'top-weekly',
+                                order: 'latest',
                                 gay: 1,
                                 lq: 1,
                                 format: 'json',
